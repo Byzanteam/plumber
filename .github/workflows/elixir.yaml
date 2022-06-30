@@ -139,3 +139,34 @@ jobs:
 
       - name: Credo
         run: mix credo diff --from-git-ref ${{ github.head_ref }}
+
+  dialyzer:
+    name: Dialyxir
+    runs-on: ubuntu-latest
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - uses: actions/cache@v3
+        with:
+          path: priv/plts
+          key: ${{ runner.os }}-plt-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-plt-
+
+      - name: Dialyzer
+        run: mix dialyzer
