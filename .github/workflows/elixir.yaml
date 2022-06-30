@@ -89,3 +89,53 @@ jobs:
 
       - name: Test
         run: mix test
+
+  credo:
+    name: Credo
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Credo
+        run: mix credo
+
+  credo-pr:
+    name: Credo
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            _build
+            deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Credo
+        run: mix credo diff --from-git-ref ${{ github.head_ref }}
