@@ -75,10 +75,11 @@ jobs:
     steps:
       - uses: byzanteam/jet-actions/setup-elixir@master
         with:
+          fetch-depth: 0
           elixir-version: ${{ env.ELIXIR_VERSION }}
           otp-version: ${{ env.OTP_VERSION }}
       - name: Credo
-        run: mix credo diff --from-git-ref ${{ github.head_ref }}
+        run: mix credo diff --from-git-merge-base ${{ github.event.pull_request.base.sha }} --all
 
   dialyzer:
     name: Dialyxir
